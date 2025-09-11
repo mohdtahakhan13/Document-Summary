@@ -6,7 +6,7 @@ DocuMind AI is a full-stack web application that allows users to upload **docume
 
 ## 🔗 Live Demo
 
-🚀 [Live Demo](document-summary-one.vercel.app)
+🚀 [Live Demo](https://document-summary-one.vercel.app)
 
 ---
 
