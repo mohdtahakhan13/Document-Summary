@@ -50,8 +50,12 @@ router.post("/summarize", async (req, res) => {
     `;
 
     const result = await model.generateContent(prompt);
+ const response = await result.response;
 
-    const summary = result.response.text();
+    const summary =
+      response.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "❌ Could not generate summary.";
+    // const summary = result.response.text();
 
     res.json({ summary });
   } catch (err) {
