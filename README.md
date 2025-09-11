@@ -6,7 +6,7 @@ DocuMind AI is a full-stack web application that allows users to upload **docume
 
 ## 🔗 Live Demo
 
-🚀 [Live Demo](#)
+🚀 [Live Demo](document-summary-one.vercel.app)
 
 ---
 
@@ -62,8 +62,7 @@ Document-Summary-Assistant/
 
 ---
 ## 👨‍💻 Developer
-Name: Mohd Taha Khan
-Email: mohdtahakhan13@gmail.com
-College: IET Lucknow
-GitHub: github.com/mohdtahakhan13
-LinkedIn: linkedin.com/in/mohd-taha-khan-b76656317
+-Name: Mohd Taha Khan
+-Email: mohdtahakhan13@gmail.com
+-College: IET Lucknow
+
