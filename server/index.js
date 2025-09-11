@@ -69,7 +69,10 @@ import jwt from "jsonwebtoken";
 
 app.use(
   cors({
-    origin: process.env.ORIGIN, 
+    origin: [
+      process.env.ORIGIN, 
+      "https://document-summary-one.vercel.app"
+    ], 
     credentials: true,
   })
 );
