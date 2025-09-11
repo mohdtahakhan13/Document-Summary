@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDF Viewer</title>
+
+  <style>
+    :root { --sidebar-w: 300px; --toolbar-h: 48px; --gap: 12px; }
+    html,body{height:100%;margin:0;background:#0f1724;color:#e5e7eb;font-family:Inter,system-ui,Arial;}
+    .app { display:flex; height:100vh; width:100vw; box-sizing:border-box; padding:env(safe-area-inset); }
+    /* sidebar thumbnails */
+    .sidebar {
+      width:var(--sidebar-w);
+      min-width:120px;
+      background:#0b1220;
+      border-right:1px solid rgba(255,255,255,0.03);
+      display:flex;
+      flex-direction:column;
+    }
+    .thumbs { overflow:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
+    .thumb { cursor:pointer; border-radius:6px; overflow:hidden; box-shadow:0 2px 4px rgba(0,0,0,0.5);}
+    .thumb canvas { display:block; width:100%; height:auto; }
+
+    /* main area */
+    .main { flex:1; display:flex; flex-direction:column; min-width:0; }
+    .toolbar {
+      height:var(--toolbar-h);
+      display:flex; align-items:center; gap:8px; padding:0 12px;
+      background:linear-gradient(180deg,#071026,#071426);
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    .toolbar button, .toolbar a { background:#0b1220; color:#e5e7eb; border:1px solid rgba(255,255,255,0.04); padding:6px 8px; border-radius:6px; cursor:pointer; }
+    .toolbar .spacer { flex:1 }
+
+    #pageContainer { flex:1; display:flex; align-items:center; justify-content:center; overflow:auto; background: #0a0f1a; padding:16px; }
+    #pageCanvas { background: white; border-radius:6px; box-shadow: 0 6px 24px rgba(2,6,23,0.6); max-width:100%; height:auto; display:block; }
+
+    /* small screen: make thumbnails horizontal on top */
+    @media (max-width: 900px) {
+      .app { flex-direction:column; }
+      .sidebar { width:100%; height:120px; order:0; }
+      .thumbs { flex-direction:row; align-items:center; padding:8px; gap:8px; overflow:auto; }
+      .main { order:1; }
+    }
+
+    /* small adjustments */
+    .page-info { color:#9ca3af; font-size:13px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar" id="sidebar">
+      <div style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.02);">
+        <div class="page-info" id="docTitle">Document</div>
+        <div class="page-info" id="pageCount"></div>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+    </div>
+
+    <div class="main">
+      <div class="toolbar">
+        <button id="prevBtn">◀ Prev</button>
+        <button id="nextBtn">Next ▶</button>
+        <div style="width:8px"></div>
+        <button id="zoomOut">−</button>
+        <button id="zoomIn">+</button>
+        <div class="spacer"></div>
+        <div id="pageLabel" class="page-info">1 / 1</div>
+        <div style="width:8px"></div>
+        <a id="downloadBtn" href="#" download="document.pdf">Download</a>
+      </div>
+
+      <div id="pageContainer">
+        <canvas id="pageCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF.js from CDN (fallback). If you prefer local, copy build files into public and update paths -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+  <script>
+    (async function () {
+      // configure worker
+      if (window['pdfjsLib']) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.worker.min.js';
+      } else {
+        console.error('pdfjsLib not loaded');
+        return;
+      }
+
+      // helpers
+      const params = new URLSearchParams(location.search);
+      const file = params.get('file');               // blob URL or remote URL
+      const fileName = params.get('name') || 'document.pdf';
+      document.getElementById('docTitle').textContent = fileName;
+
+      const thumbsEl = document.getElementById('thumbs');
+      const canvasEl = document.getElementById('pageCanvas');
+      const pageContainer = document.getElementById('pageContainer');
+      const pageLabel = document.getElementById('pageLabel');
+      const pageCountEl = document.getElementById('pageCount');
+      const downloadBtn = document.getElementById('downloadBtn');
+
+      downloadBtn.href = file;
+      downloadBtn.download = fileName;
+
+      let pdfDoc = null;
+      let currentPage = 1;
+      let currentScale = 1.0;
+
+      async function loadPdf() {
+        try {
+          const loadingTask = pdfjsLib.getDocument(file);
+          pdfDoc = await loadingTask.promise;
+          pageCountEl.textContent = `${pdfDoc.numPages} page(s)`;
+          pageLabel.textContent = `${currentPage} / ${pdfDoc.numPages}`;
+          renderThumbnails();
+          await renderPage(currentPage, true);
+        } catch (err) {
+          console.error('Error loading PDF:', err);
+          pageContainer.innerHTML = '<div style="color:#f87171">Failed to load PDF.</div>';
+        }
+      }
+
+      async function renderThumbnails() {
+        thumbsEl.innerHTML = '';
+        const maxThumbs = pdfDoc.numPages; // you can cap if very large
+        for (let p = 1; p <= maxThumbs; p++) {
+          try {
+            const page = await pdfDoc.getPage(p);
+            const viewport = page.getViewport({ scale: 0.18 });
+            const thumbCanvas = document.createElement('canvas');
+            const ctx = thumbCanvas.getContext('2d');
+            thumbCanvas.width = Math.floor(viewport.width);
+            thumbCanvas.height = Math.floor(viewport.height);
+            await page.render({ canvasContext: ctx, viewport }).promise;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'thumb';
+            wrapper.style.width = `${thumbCanvas.width}px`;
+            wrapper.appendChild(thumbCanvas);
+
+            wrapper.addEventListener('click', () => {
+              currentPage = p;
+              renderPage(currentPage);
+            });
+
+            thumbsEl.appendChild(wrapper);
+          } catch (e) {
+            console.warn('thumb error', e);
+          }
+        }
+      }
+
+      async function renderPage(pageNum, fit = false) {
+        const page = await pdfDoc.getPage(pageNum);
+        // base viewport at scale=1
+        const baseViewport = page.getViewport({ scale: 1 });
+        // compute scale to fit container width (or use currentScale)
+        const containerWidth = pageContainer.clientWidth - 32; // padding buffer
+        let scale = currentScale;
+        if (fit) {
+          scale = Math.min( (containerWidth / baseViewport.width), 1.6 ); // cap zoom
+          currentScale = scale;
+        }
+        const viewport = page.getViewport({ scale });
+        const ctx = canvasEl.getContext('2d');
+        canvasEl.width = Math.floor(viewport.width);
+        canvasEl.height = Math.floor(viewport.height);
+
+        // clear canvas
+        ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        pageLabel.textContent = `${pageNum} / ${pdfDoc.numPages}`;
+      }
+
+      // toolbar events
+      document.getElementById('prevBtn').addEventListener('click', () => {
+        if (!pdfDoc) return;
+        if (currentPage <= 1) return;
+        currentPage--;
+        renderPage(currentPage);
+      });
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (!pdfDoc) return;
+        if (currentPage >= pdfDoc.numPages) return;
+        currentPage++;
+        renderPage(currentPage);
+      });
+      document.getElementById('zoomIn').addEventListener('click', () => {
+        currentScale = Math.min(currentScale * 1.2, 3);
+        renderPage(currentPage);
+      });
+      document.getElementById('zoomOut').addEventListener('click', () => {
+        currentScale = Math.max(currentScale / 1.2, 0.4);
+        renderPage(currentPage);
+      });
+
+      // keyboard navigation
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') document.getElementById('nextBtn').click();
+        if (e.key === 'ArrowLeft') document.getElementById('prevBtn').click();
+        if (e.key === '+' || e.key === '=') document.getElementById('zoomIn').click();
+        if (e.key === '-') document.getElementById('zoomOut').click();
+      });
+
+      if (!file) {
+        pageContainer.innerHTML = '<div style="color:#f87171">No file specified. Use ?file=URL</div>';
+        return;
+      }
+      await loadPdf();
+    })();
+  </script>
+</body>
+</html>
