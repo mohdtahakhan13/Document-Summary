@@ -74,7 +74,7 @@ const Dashboard = () => {
   }, [filePreview]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/check-auth", {
+    fetch("https://document-summary-server.onrender.com/api/check-auth", {
       method: "GET",
       credentials: "include",
     })
@@ -194,7 +194,7 @@ const Dashboard = () => {
     setSummarizing(true);
     setSummary("");
     try {
-      const res = await fetch("http://localhost:5000/api/dashboard/summarize", {
+      const res = await fetch("https://document-summary-server.onrender.com/api/dashboard/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: extractedText, length: summaryLength }),
@@ -223,7 +223,7 @@ const Dashboard = () => {
     setQAHistory((prev) => [...prev, newQAItem]);
 
     try {
-      const res = await fetch("http://localhost:5000/api/dashboard/ask", {
+      const res = await fetch("https://document-summary-server.onrender.com/api/dashboard/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

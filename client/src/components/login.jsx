@@ -19,7 +19,7 @@ const Login = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        "http://localhost:5000/api/login",
+        "https://document-summary-server.onrender.com/api/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

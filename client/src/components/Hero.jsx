@@ -8,7 +8,7 @@ const Hero = () => {
 
   React.useEffect(() => {
     fetch(
-      "http://localhost:5000/api/check-auth",
+      "https://document-summary-server.onrender.com/api/check-auth",
       {
         method: "GET",
         credentials: "include",

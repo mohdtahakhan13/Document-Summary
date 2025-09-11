@@ -13,7 +13,7 @@ const Navbar = () => {
 
   useEffect(() => {
     fetch(
-      "http://localhost:5000/api/check-auth",
+      "https://document-summary-server.onrender.com/api/check-auth",
       {
         method: "GET",
         credentials: "include",
@@ -25,7 +25,7 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    fetch("http://localhost:5000/api/logout/", {
+    fetch("https://document-summary-server.onrender.com/api/logout/", {
       method: "POST",
       credentials: "include",
     }).then(() => {
