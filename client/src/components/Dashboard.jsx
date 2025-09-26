@@ -22,6 +22,12 @@ import Footer from "./Footer";
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 const Dashboard = () => {
+
+  const API_BASE =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://document-summary-server.onrender.com";
+  
   const [loggedIn, setLoggedIn] = useState(false);
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
@@ -74,7 +80,7 @@ const Dashboard = () => {
   }, [filePreview]);
 
   useEffect(() => {
-    fetch("https://document-summary-server.onrender.com/api/check-auth", {
+    fetch(`${API_BASE}/api/check-auth`, {
       method: "GET",
       credentials: "include",
     })
@@ -194,7 +200,7 @@ const Dashboard = () => {
     setSummarizing(true);
     setSummary("");
     try {
-      const res = await fetch("https://document-summary-server.onrender.com/api/dashboard/summarize", {
+      const res = await fetch(`${API_BASE}/api/dashboard/summarize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: extractedText, length: summaryLength }),
@@ -223,7 +229,7 @@ const Dashboard = () => {
     setQAHistory((prev) => [...prev, newQAItem]);
 
     try {
-      const res = await fetch("https://document-summary-server.onrender.com/api/dashboard/ask", {
+      const res = await fetch(`${API_BASE}/api/dashboard/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
