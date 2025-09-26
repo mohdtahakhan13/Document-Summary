@@ -72,7 +72,7 @@ setup:
       env_file: |
         PORT=5000
         ORIGIN=http://localhost:5173
-        MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/summarizex
+        MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/<db_name>
         JWT_SECRET=your_jwt_secret
         JWT_TIMEOUT=your_jwt_timeout
         GOOGLE_CLIENT_ID=your_google_client_id
