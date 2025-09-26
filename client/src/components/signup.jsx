@@ -15,12 +15,15 @@ const Signup = () => {
     formState: { errors, isSubmitting },
   } = useForm();
   const [loading, setLoading] = React.useState(false);
-
+const API_BASE =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://document-summary-server.onrender.com";
   const onSubmit = async (data) => {
     setLoading(true);
     try {
       const res = await fetch(
-        "https://document-summary-server.onrender.com/api/signup/create",
+        `${API_BASE}/api/signup/create`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
