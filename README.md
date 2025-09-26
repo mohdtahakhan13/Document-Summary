@@ -51,6 +51,52 @@ Document-Summary-Assistant/
 └── README.md
 ```
 ---
+## Set Up
+folders:
+  - client/   # Frontend (React + Vite)
+  - backend/  # Backend (Express + MongoDB)
+
+setup:
+  steps:
+    - step: Download/Clone
+      description: |
+        Download the project ZIP from GitHub or clone the repo.
+        Example:
+          git clone <repo-url>
+          cd <repo-name>
+    
+    - step: Backend Setup
+      commands:
+        - cd backend
+        - npm install
+      env_file: |
+        PORT=5000
+        ORIGIN=http://localhost:5173
+        MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/summarizex
+        JWT_SECRET=your_jwt_secret
+        JWT_TIMEOUT=your_jwt_timeout
+        GOOGLE_CLIENT_ID=your_google_client_id
+        GOOGLE_CLIENT_SECRET=your_google_client_secret
+        GOOGLE_REDIRECT_URI=http://localhost:5000/api/auth/google
+      run:
+        - npm run dev
+      notes: Backend will run on http://localhost:5000
+    
+    - step: Frontend Setup
+      commands:
+        - cd client
+        - npm install
+      run:
+        - npm run dev
+      notes: Frontend will run on http://localhost:5173
+
+usage:
+  - Open http://localhost:5173 in the browser.
+  - The frontend will connect to backend at http://localhost:5000.
+
+notes:
+  - Ensure MongoDB connection string (MONGO_URI) is valid.
+  - Update .env secrets with real values before running.
 
 ## 🎯 How to Use
 - **Sign Up/Login**: Create an account or login to access the dashboard
@@ -62,7 +108,7 @@ Document-Summary-Assistant/
 
 ---
 ## 👨‍💻 Developer
--Name: Mohd Taha Khan
--Email: mohdtahakhan13@gmail.com
--College: IET Lucknow
+- Name: Mohd Taha Khan
+- Email: mohdtahakhan13@gmail.com
+- College: IET Lucknow
 
