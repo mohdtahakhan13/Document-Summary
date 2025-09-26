@@ -10,10 +10,13 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const onChange = () => setNav(!nav);
-
+const API_BASE =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://document-summary-server.onrender.com";
   useEffect(() => {
     fetch(
-      "https://document-summary-server.onrender.com/api/check-auth",
+      `${API_BASE}/api/check-auth`,
       {
         method: "GET",
         credentials: "include",
@@ -25,7 +28,7 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    fetch("https://document-summary-server.onrender.com/api/logout/", {
+    fetch(`${API_BASE}/api/logout/`, {
       method: "POST",
       credentials: "include",
     }).then(() => {
