@@ -5,10 +5,13 @@ import Footer from "./Footer";
 
 const Hero = () => {
   const [loggedIn, setLoggedIn] = React.useState(false);
-
+const API_BASE =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://document-summary-server.onrender.com";
   React.useEffect(() => {
     fetch(
-      "https://document-summary-server.onrender.com/api/check-auth",
+      `${API_BASE}/api/check-auth`,
       {
         method: "GET",
         credentials: "include",
